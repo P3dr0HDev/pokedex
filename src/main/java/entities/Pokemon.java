@@ -1,6 +1,6 @@
 package entities;
 
-public class pokemon {
+public class Pokemon {
     int id;
     String name;
 
