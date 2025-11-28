@@ -21,7 +21,7 @@ public class Main {
                 4 - Remover Pokemon
                 0 - Sair
                 """);
-        System.out.print("Escolha uma opção: ");
+        System.out.print("Escolha uma opção: \n");
         return scanner.nextInt();
     }
 
@@ -41,9 +41,46 @@ public class Main {
         }
     }
 
-    static void listarPokemon(){}
+    static void listarPokemon(){
+        System.out.println("+++++++PokéDex+++++++");
 
-    static void buscarPokemon(){}
+        for (int i = 0; i < pokedex.size(); i++) {
+            Pokemon pokemon = pokedex.get(i);
+            System.out.printf("""
+                    +++++++++++++++
+                        Índice: %d
+                        Nome: %s
+                        +++++++++++++++
+                    """, i, pokemon.getName());
+        }
+        menu();
+
+    }
+
+    static void buscarPokemon(){
+        System.out.println("Buscar Pokémon...\n");
+        if (pokedex.isEmpty()) {
+            System.out.println("Nenhum Pokémon encontrado\n");
+            return;
+        }
+        System.out.println("Pokémon: ");
+        String search = scanner.nextLine().toLowerCase().trim();
+
+        for (int i = 0; i < pokedex.size(); i++) {
+            Pokemon pokemon = pokedex.get(i);
+
+            if (pokemon.getName().toLowerCase().contains(search)) {
+                System.out.printf("""
+                        +++++++++++++++
+                        Índice: %d
+                        Nome: %s
+                        +++++++++++++++
+                        """, i, pokemon.getName());
+            }
+        }
+        menu();
+
+    }
 
     static void adicionarPokemon(){}
 
