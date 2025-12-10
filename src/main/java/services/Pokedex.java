@@ -2,9 +2,7 @@ package services;
 
 import entities.Pokemon;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Pokedex {
 
@@ -13,7 +11,7 @@ public class Pokedex {
     public Pokedex() {
         this.mapPokemon = new HashMap<>();
         loadData();
-        System.out.print("Bem vindo treinador pokemon!\n\n");
+        System.out.print("Bem vindo treinador pokemon!\n");
     }
 
     public void addPokemon(Pokemon newPokemon) {
@@ -35,6 +33,19 @@ public class Pokedex {
             }
         }
         return null;
+    }
+
+    public List<Pokemon> searchByType(String type) {
+        List<Pokemon> foundPokemons = new ArrayList<>();
+
+        String searchType = type.trim().toLowerCase();
+
+        for (Pokemon p : mapPokemon.values()) {
+            if (p.getType().toLowerCase().contains(searchType)) {
+                foundPokemons.add(p);
+            }
+        }
+        return foundPokemons;
     }
 
     public Collection<Pokemon> listAll() {

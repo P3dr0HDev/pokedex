@@ -2,6 +2,7 @@ import entities.Pokemon;
 import services.Pokedex;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -16,14 +17,14 @@ public class Main {
 
     static int option(){
         System.out.print("""
-                1 - Listar Pokemon
+                \n1 - Listar Pokemon
                 2 - Buscar Pokemon
-                3 - Adicionar Pokemon
-                4 - Remover Pokemon
+                3 - Buscar por Tipo
+                4 - Adicionar Pokemon
+                5 - Remover Pokemon
                 0 - Sair
                 """);
-        System.out.print("Escolha uma opção: ");
-        return scanner.nextInt();
+        return idChecker("Escolha uma opção: ");
     }
 
     static void menu() {
@@ -31,20 +32,21 @@ public class Main {
             int option = option();
             switch (option) {
                 case 0 -> {
-                    System.out.print("Encerrando!");
+                    System.out.print("\nEncerrando!");
                     System.exit(0);
                 }
                 case 1 -> listPokemon();
                 case 2 -> searchPokemon();
-                case 3 -> addPokemon();
-                case 4 -> removePokemon();
+                case 3 -> searchPokemonType();
+                case 4 -> addPokemon();
+                case 5 -> removePokemon();
                 default -> System.out.print("Opcao Invalida");
             }
         }
     }
 
     static void listPokemon(){
-        System.out.println("+++++++PokéDex+++++++");
+        System.out.println("\n+++++++PokéDex+++++++");
 
         Collection<Pokemon> pokemons = servicePokedex.listAll();
 
@@ -60,42 +62,75 @@ public class Main {
     }
 
     static void searchPokemon(){
-        System.out.println("Buscar Pokémon...\n");
+        System.out.println("\nBuscar Pokémon...");
+        System.out.print("Digite o ID, Nome: ");
 
-        System.out.print("Digite o ID: ");
-
-        if (!scanner.hasNextInt()) {
-            System.out.println("Erro: ID deve ser um número.");
-            scanner.nextLine();
-            return;
-        }
-
-        int id = scanner.nextInt();
+        Pokemon found = null;
+        String input = scanner.next();
         scanner.nextLine();
 
-        Pokemon found = servicePokedex.searchById(id);
+        try {
+            int id = Integer.parseInt(input);
+            found = servicePokedex.searchById(id);
+        } catch (NumberFormatException e) {
+            found = servicePokedex.searchByName(input);
+        }
 
         if (found != null) {
-            System.out.println("\n+++++++ ENCONTRADO +++++++");
+            System.out.println("\n+++++++++++ ENCONTRADO +++++++++++");
             System.out.println(found);
-            System.out.println("++++++++++++++++++++++++++");
+            System.out.println("++++++++++++++++++++++++++++++++++");
         } else {
-            System.out.println("\nPokémon com ID " + id + " não encontrado.");
+            System.out.println("\nPokémon de ID ou Nome " + input + " não encontrado.");
+        }
+    }
+
+    static void searchPokemonType() {
+        System.out.println("\nBuscar Pokemon por Tipo...");
+        System.out.print("Tipo: ");
+
+        String type = scanner.nextLine();
+
+        List<Pokemon> foundPokemon = servicePokedex.searchByType(type);
+
+        if (foundPokemon.isEmpty()) {
+            System.out.println("Nenhum pokemon encontado.");
+        } else {
+            System.out.printf("Pokemons do tipo %s encontrados:\n", type);
+            for (Pokemon pokemon : foundPokemon) {
+                System.out.printf(" ID: %d | Nome: %s | Tipo: %s\n",
+                        pokemon.getId(), pokemon.getName(), pokemon.getType());
+            }
         }
     }
 
     static void addPokemon(){
-        System.out.println("Adicionar Pokémon...\n");
+        System.out.println("\nAdicionar Pokémon...");
 
-        System.out.print("ID: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
+        int id = idChecker("ID: ");
+        if (servicePokedex.searchById(id) != null) {
+            System.out.println("ID: " + id + "ja cadastrado.");
+            return;
+        }
 
         System.out.print("Nome: ");
-        String name = scanner.nextLine();
+        String name = scanner.nextLine().trim();
+        if (servicePokedex.searchByName(name) != null) {
+            System.out.println("Pokemon: " + name + "ja cadastrado.");
+            return;
+        }
+
+        if (name.isEmpty()) {
+            System.out.println("Favor, preenche corretamente o nome.");
+            return;
+        }
 
         System.out.print("Tipo: ");
-        String type = scanner.nextLine();
+        String type = scanner.nextLine().trim();
+        if (type.isEmpty()) {
+            System.out.println("Favor, preenche corretamente o nome.");
+            return;
+        }
 
         Pokemon newPokemon = new Pokemon(id, name, type);
         servicePokedex.addPokemon(newPokemon);
@@ -104,23 +139,53 @@ public class Main {
     }
 
     static void removePokemon(){
-        System.out.println("Remover Pokémon...\n");
+        System.out.println("\nRemover Pokémon...");
+        System.out.print("Digite o ID ou Nome: ");
 
-        System.out.print("Digite o ID: ");
+        Pokemon found = null;
+        String input = scanner.next();
+        scanner.nextLine();
 
-        if (!scanner.hasNextInt()) {
-            System.out.println("Erro: ID deve ser um número.");
-            scanner.nextLine();
+        try {
+            int id = Integer.parseInt(input);
+            found = servicePokedex.searchById(id);
+        } catch (NumberFormatException e) {
+            found = servicePokedex.searchByName(input);
+        }
+
+        if (found == null) {
+            System.out.println("\nErro: Pokémon de ID ou Nome " + input + " não encontrado para remoção.");
             return;
         }
 
-        int id = scanner.nextInt();
-        scanner.nextLine();
-
-        if (servicePokedex.removePokemon(id)) {
-            System.out.println("\nPokémon com ID " + id + " removido com sucesso.");
+        if (servicePokedex.removePokemon(found.getId())) {
+            System.out.printf("\nPokémon %s ID: %d removido com sucesso", found.getName(), found.getId());
         } else {
-            System.out.println("\nErro: Pokémon com ID " + id + " não encontrado para remoção.");
+            System.out.println("\nErro inesperado ao remover Pokémon.");
+        }
+    }
+
+    static int idChecker(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+                System.out.println("Erro: Não deixe o campo em branco.");
+                continue;
+            }
+
+            try {
+                int num = Integer.parseInt(input);
+                if (num <= 0) {
+                    System.out.println("Digite um valor valido.");
+                    continue;
+                }
+                return num;
+            } catch (NumberFormatException e) {
+                System.out.println("Digite apenas numeros inteiros.");
+            }
         }
     }
 }
