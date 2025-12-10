@@ -178,7 +178,7 @@ public class Main {
 
             try {
                 int num = Integer.parseInt(input);
-                if (num <= 0) {
+                if (num < 0) {
                     System.out.println("Digite um valor valido.");
                     continue;
                 }
